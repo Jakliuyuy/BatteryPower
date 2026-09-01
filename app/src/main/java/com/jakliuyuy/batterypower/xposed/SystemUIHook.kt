@@ -233,13 +233,16 @@ internal object SystemUIHook {
         }
         val extra = tv.paddingStart + tv.paddingEnd
 
-        val left = when (SbPosition.fromKey(cfg.sbPosition)) {
+        // 三个分支都显式 .toFloat()：when 作为表达式时会推断成最宽的公共类型
+        // （Number & Comparable），直接赋值给 Float 字段会类型不匹配
+        val offsetX = cfg.sbOffsetX.toFloat()
+        val left: Float = when (SbPosition.fromKey(cfg.sbPosition)) {
             SbPosition.CLOCK_LEFT ->
                 // 文字右端贴住时钟左端
-                clockLeft + cfg.sbOffsetX - (textWidth + extra)
+                clockLeft + offsetX - (textWidth + extra)
             SbPosition.CLOCK_RIGHT ->
                 // 文字左端贴住时钟右端
-                clockRight + cfg.sbOffsetX
+                (clockRight + offsetX).toFloat()
         }
 
         tv.translationX = left

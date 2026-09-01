@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.widget.TextView
+import com.jakliuyuy.batterypower.R
 import com.jakliuyuy.batterypower.data.renderBatteryText
 import com.jakliuyuy.batterypower.model.BatterySnapshot
 import com.jakliuyuy.batterypower.model.Config
