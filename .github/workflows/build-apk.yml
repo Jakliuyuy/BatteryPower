@@ -1,0 +1,230 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 编译 Debug / Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      contents: write
+
+    env:
+      # 签名：优先用仓库 secrets，没有则回退到本脚本生成的自签密钥
+      KEYSTORE_FILE: ${{ github.workspace }}/batterypower.jks
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASS || 'batterypower123' }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'batterypower' }}
+      KEY_PASSWORD: ${{ secrets.KEYSTORE_PASS || 'batterypower123' }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 安装 Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 缓存 Gradle 依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      # 直接写入许可哈希文件，比 `sdkmanager --licenses` 交互式接受更可靠
+      - name: 接受 Android SDK 许可
+        run: |
+          set -e
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "SDK 路径: $SDK"
+          sudo mkdir -p "$SDK/licenses"
+          sudo chmod -R a+w "$SDK/licenses" 2>/dev/null || true
+          for h in 24333f8a63b6825ea9c5514f83c2829b004d1fee \
+                   8933bad161af4178b1185d1a37fbf41ea5269c55 \
+                   d56f5187479451eabf01fb78af6dfcb131a6481e; do
+            printf '\n%s\n' "$h" >> "$SDK/licenses/android-sdk-license"
+          done
+          printf '\n%s\n' 84831b9409646a918e30573bab4c9c91346d8abd >> "$SDK/licenses/android-sdk-preview-license"
+          echo "--- 许可文件 ---"
+          cat "$SDK/licenses/android-sdk-license"
+
+      - name: 确保 Android 平台与构建工具就位
+        run: |
+          set -e
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          SM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          echo "已装平台: $(ls "$SDK/platforms" 2>/dev/null | tr '\n' ' ')"
+          echo "已装构建工具: $(ls "$SDK/build-tools" 2>/dev/null | tr '\n' ' ')"
+
+          CHOSEN=""
+          for v in 36 35 34; do
+            if [ -d "$SDK/platforms/android-$v" ]; then CHOSEN=$v; break; fi
+          done
+          if [ -z "$CHOSEN" ] && [ -x "$SM" ]; then
+            echo "本机无 android-34/35/36，尝试安装..."
+            sudo "$SM" --install "platforms;android-36" "build-tools;36.0.0" 2>&1 | tail -20
+            for v in 36 35 34; do
+              [ -d "$SDK/platforms/android-$v" ] && CHOSEN=$v && break
+            done
+          fi
+          if [ -z "$CHOSEN" ]; then
+            echo "::error::找不到可用的 Android 平台"
+            ls -1 "$SDK/platforms" 2>&1
+            exit 1
+          fi
+          echo "使用平台 android-$CHOSEN"
+
+          if ! ls "$SDK/build-tools" 2>/dev/null | grep -q .; then
+            echo "build-tools 缺失，尝试安装..."
+            sudo "$SM" --install "build-tools;36.0.0" 2>&1 | tail -20
+          fi
+          echo "最终 build-tools: $(ls "$SDK/build-tools" 2>/dev/null | tr '\n' ' ')"
+
+      - name: 安装 Gradle 8.11.1
+        run: |
+          set -e
+          curl -sSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+          sudo unzip -q -o /tmp/gradle.zip -d /opt
+          sudo ln -sf /opt/gradle-8.11.1/bin/gradle /usr/local/bin/gradle
+          gradle --version
+
+      # 仓库不含 gradle-wrapper.jar（二进制），由 CI 现场生成
+      - name: 生成 Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.11.1 --distribution-type bin
+
+      - name: 准备签名密钥
+        run: |
+          set -e
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "使用仓库 secrets 中的签名密钥"
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$KEYSTORE_FILE"
+            KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASS }}'
+            KEY_ALIAS='${{ secrets.KEY_ALIAS }}'
+            KEY_PASSWORD='${{ secrets.KEYSTORE_PASS }}'
+            echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "未配置签名 secrets，生成自签密钥（仅用于自动化构建分发）"
+            keytool -genkeypair -v \
+              -keystore "$KEYSTORE_FILE" \
+              -storetype JKS \
+              -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10950 \
+              -storepass "$KEYSTORE_PASSWORD" -keypass "$KEY_PASSWORD" \
+              -dname "CN=BatteryPower, OU=Dev, O=Jakliuyuy, L=Lhasa, S=Xizang, C=CN"
+          fi
+          ls -l "$KEYSTORE_FILE"
+
+      - name: 编译 Debug APK
+        id: build_debug
+        run: |
+          chmod +x ./gradlew
+          set +e
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/debug.log"
+          code=${PIPESTATUS[0]}
+          echo "exit_code=$code"
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
+
+      - name: 编译 Release APK
+        if: steps.build_debug.outputs.exit_code == '0'
+        run: ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/release.log"
+
+      - name: 整理产物
+        if: steps.build_debug.outputs.exit_code == '0'
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/BatteryPower-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk artifacts/BatteryPower-release.apk
+          ls -lh artifacts
+
+      - name: 上传 APK 产物
+        if: steps.build_debug.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BatteryPower-APK
+          path: artifacts/*.apk
+          retention-days: 30
+
+      # 无论成败都归档日志：Actions 日志需要管理员权限才能下载，
+      # 推到分支后可通过公开 API 直接读取，排查问题快得多
+      - name: 归档构建日志
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan build-logs
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p logs
+          cp "$RUNNER_TEMP/debug.log" logs/debug.log 2>/dev/null || true
+          cp "$RUNNER_TEMP/release.log" logs/release.log 2>/dev/null || true
+          {
+            echo "exit_code=${{ steps.build_debug.outputs.exit_code }}"
+            echo "run=${{ github.run_id }}"
+            echo "commit=${{ github.sha }}"
+            echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > logs/summary.txt
+          git add logs
+          git commit -m "build logs ${{ github.run_number }} ($(date -u +%Y%m%dT%H%M%SZ))" || echo "无变更，跳过"
+          git push -f origin build-logs
+
+      # 同时推一份到 apk 分支，便于用 codeload 直接打包下载
+      - name: 推送 APK 到 apk 分支
+        if: steps.build_debug.outputs.exit_code == '0'
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan apk
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p apks
+          cp artifacts/BatteryPower-debug.apk apks/BatteryPower-debug.apk
+          cp artifacts/BatteryPower-release.apk apks/BatteryPower-release.apk
+          git add -f apks
+          git commit -m "APK build #${{ github.run_number }} (${{ github.sha }})"
+          git push -f origin apk
+          echo "已推送到 apk 分支"
+
+      - name: 发布 APK 到 Release
+        if: steps.build_debug.outputs.exit_code == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: >-
+            GitHub Actions 自动构建（commit ${{ github.sha }}）。
+            BatteryPower-debug.apk 为调试版；BatteryPower-release.apk 为已签名版。
+            两者 applicationId 不同，可同时安装。
+            状态栏内嵌需在 LSPosed 中勾选本模块并重启 SystemUI。
+        run: |
+          set -e
+          TAG=apk-latest
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes 2>/dev/null || true
+          git push --delete origin "refs/tags/$TAG" 2>/dev/null || true
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "BatteryPower APK 自动构建 #${{ github.run_number }}" \
+            --notes "$NOTES" \
+            artifacts/BatteryPower-debug.apk artifacts/BatteryPower-release.apk
+          echo "已发布到 https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
+
+      - name: 打版本 Tag 时发布正式 Release
+        if: startsWith(github.ref, 'refs/tags/v') && steps.build_debug.outputs.exit_code == '0'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.apk
+          generate_release_notes: true

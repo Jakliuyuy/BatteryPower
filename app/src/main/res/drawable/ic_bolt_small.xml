@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 通知栏小图标：白色闪电，透明背景（状态栏图标规范要求单色 + 透明底） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11,21h-1l1,-7H7.5c-0.58,0 -0.57,-0.32 -0.38,-0.66 0.19,-0.34 0.06,-0.02 0.06,-0.02 1.19,-2.05 2.6,-4.47 3.44,-5.9 0.28,-0.48 0.76,-0.74 1.26,-0.74H16c0.46,0 0.85,0.31 0.95,0.75 0.1,0.44 -0.11,0.9 -0.5,1.08L12.5,11H18c0.55,0 1,0.45 1,1 0,0.28 -0.11,0.53 -0.3,0.71 -0.19,0.18 -0.45,0.29 -0.73,0.29h-0.5l-1.5,8H11z" />
+</vector>

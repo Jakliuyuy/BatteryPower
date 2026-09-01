@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">电池功率悬浮窗</string>
+    <string name="xposed_description">在状态栏与悬浮窗中实时显示电池功率/电流/电压/温度</string>
+
+    <!-- 状态区 -->
+    <string name="section_status">运行状态</string>
+    <string name="grant_overlay">授权悬浮窗</string>
+    <string name="grant_overlay_done">悬浮窗已授权</string>
+    <string name="grant_notify">授权通知</string>
+    <string name="grant_notify_done">通知已授权</string>
+    <string name="restart_systemui">重启 SystemUI（加载模块）</string>
+    <string name="status_placeholder">正在读取…</string>
+    <string name="status_overlay_perm">悬浮窗权限: %1$s</string>
+    <string name="status_notify_perm">通知权限: %1$s</string>
+    <string name="status_root">Root 会话: %1$s</string>
+    <string name="status_source">数据源: %1$s</string>
+    <string name="status_power">功率: %1$.2f W</string>
+    <string name="status_current">电流: %1$.0f mA</string>
+    <string name="status_voltage">电压: %1$.2f V</string>
+    <string name="status_temp">温度: %1$.1f ℃</string>
+    <string name="status_level">电量: %1$d %%</string>
+    <string name="status_no_root_hint">未取得 root，电流可能恒为 0。请检查 KernelSU 授权。</string>
+
+    <!-- 悬浮窗 -->
+    <string name="overlay_enable">启用悬浮窗</string>
+    <string name="overlay_need_root">需 root 授权</string>
+    <string name="overlay_no_data">无数据</string>
+
+    <!-- 状态栏 -->
+    <string name="sb_enable">启用状态栏内嵌显示</string>
+    <string name="sb_hint">需 LSPosed 中勾选本模块并重启 SystemUI。修改配置约 0.5 秒生效。</string>
+
+    <!-- 通用标签 -->
+    <string name="label_fields">显示项</string>
+    <string name="label_color">文字颜色（拖动选取）</string>
+    <string name="label_text_size">字体大小</string>
+    <string name="label_text_size_value">字体大小：%1$.0f sp</string>
+    <string name="label_interval">刷新频率</string>
+    <string name="label_show_unit">显示单位</string>
+    <string name="label_position">显示位置</string>
+
+    <string name="interval_500">0.5s</string>
+    <string name="interval_1000">1s</string>
+    <string name="interval_2000">2s</string>
+    <string name="interval_3000">3s</string>
+    <string name="interval_5000">5s</string>
+
+    <string name="pos_clock_left">时钟左侧</string>
+    <string name="pos_clock_right">时钟右侧</string>
+
+    <string name="offset_x">水平 %1$d</string>
+    <string name="offset_y">垂直 %1$d</string>
+    <string name="step_minus">减少 10px</string>
+    <string name="step_plus">增加 10px</string>
+
+    <!-- 诊断 -->
+    <string name="section_diagnose">电池节点诊断</string>
+    <string name="run_diagnose">探测电池节点与 root 状态</string>
+    <string name="diagnose_placeholder">点击上方按钮开始探测</string>
+    <string name="diagnose_running">探测中…</string>
+
+    <!-- 提示 -->
+    <string name="toast_need_overlay">请先授予悬浮窗权限</string>
+    <string name="toast_open_settings_failed">无法打开系统设置页</string>
+    <string name="toast_sb_on">已开启，状态栏约 0.5 秒后出现</string>
+    <string name="toast_sb_off">已关闭状态栏显示</string>
+    <string name="toast_restarting_systemui">正在重启 SystemUI…</string>
+    <string name="toast_restart_done">已发送重启命令</string>
+    <string name="toast_restart_failed">重启失败，请确认已授予 root</string>
+
+    <!-- 通知 -->
+    <string name="notify_channel_name">电池功率监控</string>
+    <string name="notify_title">电池功率监控中</string>
+    <string name="notify_text">点击打开设置，可在此关闭悬浮窗</string>
+    <string name="notify_action_stop">关闭</string>
+</resources>
