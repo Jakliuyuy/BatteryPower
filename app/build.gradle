@@ -1,0 +1,78 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.jakliuyuy.batterypower'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.jakliuyuy.batterypower'
+        minSdk 26
+        targetSdk 34
+        versionCode 3100
+        versionName '3.1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    signingConfigs {
+        release {
+            // Optional CI signing. When the secrets are absent the release build
+            // falls back to the debug keystore so Actions always produces an APK.
+            def ksB64 = System.getenv('KEYSTORE_BASE64')
+            if (ksB64 != null && !ksB64.trim().isEmpty()) {
+                def ksFile = new File(rootProject.layout.buildDirectory.get().asFile, 'ci-keystore.jks')
+                ksFile.parentFile.mkdirs()
+                ksFile.bytes = Base64.getDecoder().decode(ksB64.trim())
+                storeFile ksFile
+                storePassword(System.getenv('KEYSTORE_PASS') ?: 'android')
+                keyAlias(System.getenv('KEY_ALIAS') ?: 'androiddebugkey')
+                keyPassword(System.getenv('KEYSTORE_PASS') ?: 'android')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            // Keep the applicationId identical across variants so that the
+            // ConfigProvider authority stays stable for the SystemUI hook.
+        }
+        release {
+            minifyEnabled false
+            def ksB64 = System.getenv('KEYSTORE_BASE64')
+            if (ksB64 != null && !ksB64.trim().isEmpty()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    // Xposed API: compile-time only, provided by LSPosed at runtime.
+    compileOnly project(':xposedapi')
+
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+}

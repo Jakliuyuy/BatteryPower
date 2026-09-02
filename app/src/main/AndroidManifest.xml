@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <queries>
+        <package android:name="com.android.systemui" />
+    </queries>
+
+    <application
+        android:name=".app.BatteryPowerApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BatteryPower"
+        tools:targetApi="34">
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.BatteryPower">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.OnboardingActivity"
+            android:exported="false"
+            android:label="@string/title_onboarding" />
+
+        <activity
+            android:name=".ui.settings.OverlaySettingsActivity"
+            android:exported="false"
+            android:label="@string/title_overlay_settings" />
+
+        <activity
+            android:name=".ui.settings.StatusBarSettingsActivity"
+            android:exported="false"
+            android:label="@string/title_statusbar_settings" />
+
+        <activity
+            android:name=".ui.settings.DisplayFieldsActivity"
+            android:exported="false"
+            android:label="@string/title_display_fields" />
+
+        <activity
+            android:name=".ui.settings.AppearanceActivity"
+            android:exported="false"
+            android:label="@string/title_appearance" />
+
+        <activity
+            android:name=".ui.color.ColorActivity"
+            android:exported="false"
+            android:label="@string/title_color" />
+
+        <activity
+            android:name=".ui.DiagnosticsActivity"
+            android:exported="false"
+            android:label="@string/title_diagnostics" />
+
+        <activity
+            android:name=".ui.settings.AdvancedActivity"
+            android:exported="false"
+            android:label="@string/title_advanced" />
+
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false"
+            android:label="@string/title_about" />
+
+        <service
+            android:name=".app.OverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Display real-time battery power information in a system overlay." />
+        </service>
+
+        <provider
+            android:name=".app.ConfigProvider"
+            android:authorities="${applicationId}.config"
+            android:exported="true"
+            android:grantUriPermissions="false" />
+
+        <receiver
+            android:name=".app.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

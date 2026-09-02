@@ -1,0 +1,89 @@
+=== release apk contents ===
+Archive:  out/app-release.apk
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       56  1981-01-01 01:01   META-INF/com/android/build/gradle/app-metadata.properties
+      120  1981-01-01 01:01   META-INF/version-control-info.textproto
+     2971  1981-01-01 01:01   assets/dexopt/baseline.prof
+      267  1981-01-01 01:01   assets/dexopt/baseline.profm
+  9341032  1981-01-01 01:01   classes.dex
+   596536  1981-01-01 01:01   classes2.dex
+       44  1981-01-01 01:01   assets/xposed_init
+     1738  1981-01-01 01:01   DebugProbesKt.bin
+        6  1981-01-01 01:01   META-INF/androidx.activity_activity.version
+        6  1981-01-01 01:01   META-INF/androidx.annotation_annotation-experimental.version
+        6  1981-01-01 01:01   META-INF/androidx.appcompat_appcompat-resources.version
+        6  1981-01-01 01:01   META-INF/androidx.appcompat_appcompat.version
+       67  1981-01-01 01:01   META-INF/androidx.arch.core_core-runtime.version
+        6  1981-01-01 01:01   META-INF/androidx.cardview_cardview.version
+        6  1981-01-01 01:01   META-INF/androidx.constraintlayout_constraintlayout.version
+        6  1981-01-01 01:01   META-INF/androidx.coordinatorlayout_coordinatorlayout.version
+        7  1981-01-01 01:01   META-INF/androidx.core_core-ktx.version
+        7  1981-01-01 01:01   META-INF/androidx.core_core.version
+        6  1981-01-01 01:01   META-INF/androidx.cursoradapter_cursoradapter.version
+        6  1981-01-01 01:01   META-INF/androidx.customview_customview.version
+        6  1981-01-01 01:01   META-INF/androidx.documentfile_documentfile.version
+        6  1981-01-01 01:01   META-INF/androidx.drawerlayout_drawerlayout.version
+        6  1981-01-01 01:01   META-INF/androidx.dynamicanimation_dynamicanimation.version
+        6  1981-01-01 01:01   META-INF/androidx.emoji2_emoji2-views-helper.version
+        6  1981-01-01 01:01   META-INF/androidx.emoji2_emoji2.version
+        6  1981-01-01 01:01   META-INF/androidx.fragment_fragment.version
+        6  1981-01-01 01:01   META-INF/androidx.interpolator_interpolator.version
+        6  1981-01-01 01:01   META-INF/androidx.legacy_legacy-support-core-utils.version
+       78  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-livedata-core.version
+       73  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-livedata.version
+       72  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-process.version
+       72  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-runtime.version
+       85  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version
+       74  1981-01-01 01:01   META-INF/androidx.lifecycle_lifecycle-viewmodel.version
+        6  1981-01-01 01:01   META-INF/androidx.loader_loader.version
+        6  1981-01-01 01:01   META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version
+        6  1981-01-01 01:01   META-INF/androidx.print_print.version
+        6  1981-01-01 01:01   META-INF/androidx.profileinstaller_profileinstaller.version
+        6  1981-01-01 01:01   META-INF/androidx.recyclerview_recyclerview.version
+        6  1981-01-01 01:01   META-INF/androidx.savedstate_savedstate.version
+        6  1981-01-01 01:01   META-INF/androidx.startup_startup-runtime.version
+        6  1981-01-01 01:01   META-INF/androidx.tracing_tracing.version
+        6  1981-01-01 01:01   META-INF/androidx.transition_transition.version
+        6  1981-01-01 01:01   META-INF/androidx.vectordrawable_vectordrawable-animated.version
+        6  1981-01-01 01:01   META-INF/androidx.vectordrawable_vectordrawable.version
+        6  1981-01-01 01:01   META-INF/androidx.versionedparcelable_versionedparcelable.version
+        6  1981-01-01 01:01   META-INF/androidx.viewpager2_viewpager2.version
+        6  1981-01-01 01:01   META-INF/androidx.viewpager_viewpager.version
+    10175  1981-01-01 01:01   META-INF/androidx/constraintlayout/constraintlayout-core/LICENSE.txt
+        7  1981-01-01 01:01   META-INF/com.google.android.material_material.version
+        5  1981-01-01 01:01   META-INF/kotlinx_coroutines_android.version
+        5  1981-01-01 01:01   META-INF/kotlinx_coroutines_core.version
+       54  1981-01-01 01:01   META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler
+       52  1981-01-01 01:01   META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory
+      627  1981-01-01 01:01   kotlin-tooling-metadata.json
+      928  1981-01-01 01:01   kotlin/annotation/annotation.kotlin_builtins
+     3685  1981-01-01 01:01   kotlin/collections/collections.kotlin_builtins
+=== xposed_init ===
+com.jakliuyuy.batterypower.xposed.HookEntry
+=== badging ===
+package: name='com.jakliuyuy.batterypower' versionCode='3100' versionName='3.1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+sdkVersion:'26'
+targetSdkVersion:'34'
+uses-permission: name='android.permission.SYSTEM_ALERT_WINDOW'
+uses-permission: name='android.permission.FOREGROUND_SERVICE'
+uses-permission: name='android.permission.FOREGROUND_SERVICE_SPECIAL_USE'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.POST_NOTIFICATIONS'
+uses-permission: name='com.jakliuyuy.batterypower.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+application-label:'Battery Power'
+application-label-af:'Battery Power'
+application-label-am:'Battery Power'
+application-label-ar:'Battery Power'
+application-label-as:'Battery Power'
+application-label-az:'Battery Power'
+application-label-be:'Battery Power'
+application-label-bg:'Battery Power'
+application-label-bn:'Battery Power'
+application-label-bs:'Battery Power'
+application-label-ca:'Battery Power'
+application-label-cs:'Battery Power'
+application-label-da:'Battery Power'
+application-label-de:'Battery Power'
+application-label-el:'Battery Power'
+application-label-en-AU:'Battery Power'

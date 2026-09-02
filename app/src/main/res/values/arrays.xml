@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.android.systemui</item>
+    </string-array>
+
+    <string-array name="theme_modes">
+        <item>跟随系统</item>
+        <item>浅色</item>
+        <item>深色</item>
+    </string-array>
+
+    <string-array name="font_styles">
+        <item>普通</item>
+        <item>Medium</item>
+        <item>Bold</item>
+    </string-array>
+
+    <string-array name="overlay_layouts">
+        <item>单行</item>
+        <item>自动换行</item>
+    </string-array>
+
+    <string-array name="statusbar_anchors">
+        <item>时钟左侧</item>
+        <item>时钟右侧</item>
+    </string-array>
+
+    <string-array name="overlay_refresh_entries">
+        <item>0.5 秒</item>
+        <item>1 秒</item>
+        <item>2 秒</item>
+    </string-array>
+
+    <string-array name="statusbar_refresh_entries">
+        <item>0.5 秒</item>
+        <item>1 秒</item>
+        <item>2 秒</item>
+        <item>3 秒</item>
+        <item>5 秒</item>
+    </string-array>
+</resources>
