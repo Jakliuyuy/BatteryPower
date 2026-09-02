@@ -91,7 +91,7 @@ object ModuleStatus {
                 callback(HookState.RUNNING)
             }
         }
-        return try {
+        try {
             val filter = IntentFilter(ACTION_ALIVE)
             if (Build.VERSION.SDK_INT >= 33) {
                 context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)

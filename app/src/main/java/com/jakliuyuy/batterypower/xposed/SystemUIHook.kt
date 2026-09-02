@@ -369,11 +369,10 @@ object SystemUIHook {
                 return existing
             }
             val powerView = SystemUIPowerView(root.context)
-            val params = try {
-                root.generateDefaultLayoutParams()
-            } catch (t: Throwable) {
-                null
-            } ?: ViewGroup.LayoutParams(
+            // generateDefaultLayoutParams() is protected on ViewGroup, so build
+            // an equivalent layout container manually (spec 27: add directly to
+            // the outermost status bar root).
+            val params = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )

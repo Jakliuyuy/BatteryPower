@@ -40,11 +40,15 @@ class SystemUiConfigCache(context: Context) {
         try {
             val editor = prefs?.edit() ?: return
             for ((key, value) in map) {
-                value.toIntOrNull()?.let { editor.putInt(key, it); continue }
-                value.toLongOrNull()?.let { editor.putLong(key, it); continue }
-                value.toFloatOrNull()?.let { editor.putFloat(key, it); continue }
-                value.toBooleanStrictOrNull()?.let { editor.putBoolean(key, it); continue }
-                editor.putString(key, value)
+                when {
+                    value.toIntOrNull() != null -> editor.putInt(key, value.toInt())
+                    value.toLongOrNull() != null -> editor.putLong(key, value.toLong())
+                    value.toFloatOrNull() != null -> editor.putFloat(key, value.toFloat())
+                    value.equals("true", ignoreCase = true) ||
+                        value.equals("false", ignoreCase = true) ->
+                        editor.putBoolean(key, value.toBoolean())
+                    else -> editor.putString(key, value)
+                }
             }
             editor.apply()
         } catch (t: Throwable) {
