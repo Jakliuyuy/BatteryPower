@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Battery Power</string>
+    <string name="app_subtitle">实时电池监视器</string>
+    <string name="xposed_description">Battery Power Overlay — 在系统状态栏显示实时电池功率</string>
+
+    <string name="title_onboarding">开始使用</string>
+    <string name="title_overlay_settings">悬浮窗设置</string>
+    <string name="title_statusbar_settings">状态栏设置</string>
+    <string name="title_display_fields">显示项目</string>
+    <string name="title_appearance">外观</string>
+    <string name="title_color">颜色</string>
+    <string name="title_diagnostics">电池诊断</string>
+    <string name="title_advanced">高级设置</string>
+    <string name="title_about">关于</string>
+
+    <string name="tab_home">主页</string>
+    <string name="tab_overlay">悬浮窗</string>
+    <string name="tab_statusbar">状态栏</string>
+    <string name="tab_diagnostics">诊断</string>
+    <string name="tab_advanced">高级</string>
+
+    <string name="overlay_title">悬浮窗</string>
+    <string name="overlay_summary">在所有应用上方显示电池信息</string>
+    <string name="statusbar_title">状态栏监视器</string>
+    <string name="statusbar_summary">在系统状态栏显示电池信息</string>
+
+    <string name="quick_settings">快速设置</string>
+    <string name="display_fields">显示项目</string>
+    <string name="field_power">功率</string>
+    <string name="field_current">电流</string>
+    <string name="field_voltage">电压</string>
+    <string name="field_temperature">温度</string>
+    <string name="field_capacity">电量</string>
+
+    <string name="settings_overlay">悬浮窗设置</string>
+    <string name="settings_statusbar">状态栏设置</string>
+    <string name="settings_diagnostics">电池诊断</string>
+    <string name="settings_advanced">高级设置</string>
+
+    <string name="status_charging">CHARGING</string>
+    <string name="status_discharging">DISCHARGING</string>
+    <string name="status_full">FULL</string>
+    <string name="status_not_charging">NOT CHARGING</string>
+    <string name="status_unknown">UNKNOWN</string>
+    <string name="status_unavailable">UNAVAILABLE</string>
+
+    <string name="notification_channel_name">电池监控</string>
+    <string name="notification_title">Battery Power</string>
+    <string name="notification_text">正在监控电池</string>
+
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_ok">确定</string>
+    <string name="action_reset">恢复默认</string>
+    <string name="action_copy">复制</string>
+    <string name="action_retry">重新检测</string>
+    <string name="action_restart_systemui">重启 SystemUI</string>
+    <string name="copied">已复制到剪贴板</string>
+
+    <string name="value_unknown">--</string>
+    <string name="updated_ago">Updated %1$s ago</string>
+</resources>

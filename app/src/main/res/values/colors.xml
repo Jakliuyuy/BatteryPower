@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FF0B0E13</color>
+
+    <color name="battery_accent_default">#FF4DD0E1</color>
+    <color name="battery_accent_blue">#FF5B8DEF</color>
+    <color name="battery_accent_green">#FF42C76A</color>
+    <color name="battery_accent_amber">#FFFFB300</color>
+    <color name="battery_accent_purple">#FFB06BEF</color>
+    <color name="battery_accent_white">#FFFFFFFF</color>
+</resources>

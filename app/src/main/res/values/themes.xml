@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- DayNight base: the effective light/dark variant is selected at runtime
+         by AppCompatDelegate according to the user's theme-mode setting. -->
+    <style name="Theme.BatteryPower" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="colorPrimary">@color/battery_accent_default</item>
+        <item name="colorAccent">@color/battery_accent_default</item>
+        <item name="android:windowTranslucentStatus">false</item>
+    </style>
+
+    <style name="Theme.BatteryPower.Onboarding" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorPrimary">@color/battery_accent_default</item>
+    </style>
+
+    <!-- Accent overlays applied at runtime before setContentView. -->
+    <style name="OverlayAccent.Blue">
+        <item name="colorPrimary">@color/battery_accent_blue</item>
+        <item name="colorAccent">@color/battery_accent_blue</item>
+    </style>
+    <style name="OverlayAccent.Green">
+        <item name="colorPrimary">@color/battery_accent_green</item>
+        <item name="colorAccent">@color/battery_accent_green</item>
+    </style>
+    <style name="OverlayAccent.Amber">
+        <item name="colorPrimary">@color/battery_accent_amber</item>
+        <item name="colorAccent">@color/battery_accent_amber</item>
+    </style>
+    <style name="OverlayAccent.Purple">
+        <item name="colorPrimary">@color/battery_accent_purple</item>
+        <item name="colorAccent">@color/battery_accent_purple</item>
+    </style>
+    <style name="OverlayAccent.White">
+        <item name="colorPrimary">@color/battery_accent_white</item>
+        <item name="colorAccent">@color/battery_accent_white</item>
+    </style>
+
+</resources>
