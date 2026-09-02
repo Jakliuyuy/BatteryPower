@@ -79,12 +79,21 @@ jobs:
           /opt/gradle-8.11.1/bin/gradle :app:assembleRelease --stacktrace --no-daemon 2>&1 | tee release-build.log
           exit ${PIPESTATUS[0]}
 
-      - name: Collect artifacts
+      - name: Collect and inspect APKs
         if: always()
         run: |
           mkdir -p out
           find app/build/outputs/apk -name "*.apk" -exec cp {} out/ \; 2>/dev/null || true
           ls -la out/ | tee apk-list.txt
+          if [ -f out/app-release.apk ]; then
+            echo "=== release apk contents ===" | tee -a apk-inspect.txt
+            unzip -l out/app-release.apk | head -60 | tee -a apk-inspect.txt
+            echo "=== xposed_init ===" | tee -a apk-inspect.txt
+            unzip -p out/app-release.apk assets/xposed_init | tee -a apk-inspect.txt
+            echo "=== badging ===" | tee -a apk-inspect.txt
+            AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 2>/dev/null | head -1)
+            if [ -n "$AAPT" ]; then "$AAPT" dump badging out/app-release.apk | head -25 | tee -a apk-inspect.txt; fi
+          fi
 
       - name: Publish build logs
         if: always()
@@ -100,9 +109,34 @@ jobs:
           cp env-gradle.txt logs/env-gradle.txt 2>/dev/null || true
           cp env-installed.txt logs/env-installed.txt 2>/dev/null || true
           cp apk-list.txt logs/apk-list.txt 2>/dev/null || true
+          cp apk-inspect.txt logs/apk-inspect.txt 2>/dev/null || true
           git add -A logs
           git commit -m "ci logs run ${{ github.run_number }}" || echo "nothing to commit"
           git push origin HEAD:ci-logs --force
+
+      - name: Read version
+        id: version
+        run: |
+          NAME=$(grep -m1 "versionName" app/build.gradle | sed "s/.*versionName *'//;s/'.*//")
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NAME-b${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        if: steps.build_release.outcome == 'success' || steps.build_debug.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG=${{ steps.version.outputs.tag }}
+          gh release create "$TAG" \
+            --title "Battery Power Overlay ${{ steps.version.outputs.name }} (build ${{ github.run_number }})" \
+            --notes "自动构建 #${{ github.run_number }}（commit ${{ github.sha }}）
+
+          - app-release.apk：发布版（未配置签名 Secret 时使用 debug 签名）
+          - app-debug.apk：调试版
+
+          安装后：LSPosed 中启用模块并勾选 SystemUI，重启 SystemUI 即可在状态栏显示功率。" \
+            out/app-release.apk out/app-debug.apk 2>&1 | tee release-create.log || echo "release creation skipped"
 
       - name: Upload debug APK
         if: steps.build_debug.outcome == 'success'
