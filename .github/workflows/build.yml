@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: build-${{ github.ref }}
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -47,7 +49,7 @@ jobs:
           if ! sdkmanager --install "build-tools;36.0.0" > /dev/null 2>&1; then
             sdkmanager --install "build-tools;35.0.0" > /dev/null
           fi
-          sdkmanager --list_installed | sed -n '1,40p'
+          sdkmanager --list_installed > env-installed.txt 2>&1 || true
 
       - name: Set up Gradle 8.11.1
         run: |
@@ -56,24 +58,54 @@ jobs:
           unzip -q /tmp/gradle.zip -d /opt
           echo "/opt/gradle-8.11.1/bin" >> "$GITHUB_PATH"
 
-      - name: Grant execute permission
-        run: chmod +x gradlew 2>/dev/null || true
+      - name: Environment summary
+        run: |
+          java -version 2>&1 | tee env-java.txt
+          /opt/gradle-8.11.1/bin/gradle --version 2>&1 | tee env-gradle.txt
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon
+        id: build_debug
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          /opt/gradle-8.11.1/bin/gradle :app:assembleDebug --stacktrace --no-daemon 2>&1 | tee debug-build.log
+          exit ${PIPESTATUS[0]}
 
       - name: Build release APK
-        run: gradle :app:assembleRelease --stacktrace --no-daemon
+        id: build_release
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          /opt/gradle-8.11.1/bin/gradle :app:assembleRelease --stacktrace --no-daemon 2>&1 | tee release-build.log
+          exit ${PIPESTATUS[0]}
 
-      - name: Collect APKs
-        id: collect
+      - name: Collect artifacts
+        if: always()
+        run: |
+          mkdir -p out
+          find app/build/outputs/apk -name "*.apk" -exec cp {} out/ \; 2>/dev/null || true
+          ls -la out/ | tee apk-list.txt
+
+      - name: Publish build logs
+        if: always()
         run: |
           set -e
-          mkdir -p out
-          find app/build/outputs/apk -name "*.apk" -exec cp {} out/ \;
-          ls -la out/
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git checkout --orphan ci-logs 2>/dev/null || git checkout ci-logs
+          mkdir -p logs
+          cp debug-build.log logs/debug-build.log 2>/dev/null || true
+          cp release-build.log logs/release-build.log 2>/dev/null || true
+          cp env-java.txt logs/env-java.txt 2>/dev/null || true
+          cp env-gradle.txt logs/env-gradle.txt 2>/dev/null || true
+          cp env-installed.txt logs/env-installed.txt 2>/dev/null || true
+          cp apk-list.txt logs/apk-list.txt 2>/dev/null || true
+          git add -A logs
+          git commit -m "ci logs run ${{ github.run_number }}" || echo "nothing to commit"
+          git push origin HEAD:ci-logs --force
 
       - name: Upload debug APK
+        if: steps.build_debug.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: BatteryPower-debug
@@ -81,18 +113,13 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload release APK
+        if: steps.build_release.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: BatteryPower-release
           path: out/app-release.apk
           if-no-files-found: warn
 
-      - name: Upload mapping and reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-reports
-          path: |
-            app/build/reports
-            app/build/outputs/logs
-          if-no-files-found: ignore
+      - name: Fail job if a build failed
+        if: steps.build_debug.outcome == 'failure' || steps.build_release.outcome == 'failure'
+        run: exit 1
