@@ -316,7 +316,6 @@ class MainActivity : BaseActivity() {
         )
 
         statusText.text = BatteryFormatter.statusText(snapshot).uppercase(Locale.US)
-        powerText.text = BatteryFormatter.formatPower(snapshot, options).let { spaced(it) }
 
         val color = when {
             snapshot.error != null -> Color.parseColor("#FFF2B8B5")
@@ -325,15 +324,28 @@ class MainActivity : BaseActivity() {
         }
         powerText.setTextColor(color)
 
-        val parts = ArrayList<String>(4)
-        if (config.display.current) parts.add(spaced(BatteryFormatter.formatCurrent(snapshot, options)))
-        if (config.display.voltage) parts.add(spaced(BatteryFormatter.formatVoltage(snapshot, options)))
-        if (config.display.temperature) parts.add(spaced(BatteryFormatter.formatTemperature(snapshot, options)))
-        if (config.display.capacity) parts.add(spaced(BatteryFormatter.formatCapacity(snapshot, options)))
+        // The headline metric follows the display configuration: power when it is
+        // enabled, otherwise the first enabled field (spec 137.3).
+        val items = LinkedHashMap<String, String>()
+        if (config.display.power) items["power"] = BatteryFormatter.formatPower(snapshot, options)
+        if (config.display.current) items["current"] = BatteryFormatter.formatCurrent(snapshot, options)
+        if (config.display.voltage) items["voltage"] = BatteryFormatter.formatVoltage(snapshot, options)
+        if (config.display.temperature) items["temperature"] = BatteryFormatter.formatTemperature(snapshot, options)
+        if (config.display.capacity) items["capacity"] = BatteryFormatter.formatCapacity(snapshot, options)
 
+        if (items.isEmpty()) {
+            powerText.text = spaced(BatteryFormatter.formatPower(snapshot, options))
+        } else {
+            val first = items.entries.first().value
+            powerText.text = spaced(first)
+            // Big number for the headline, smaller for the remaining fields.
+            powerText.textSize = if (items.size > 1) 30f else 34f
+        }
+
+        val rest = items.entries.drop(1).map { spaced(it.value) }
         for (i in fieldSlots.indices) {
             val slot = fieldSlots[i]
-            val value = parts.getOrNull(i)
+            val value = rest.getOrNull(i)
             if (value == null) {
                 slot.visibility = View.INVISIBLE
                 slot.text = ""

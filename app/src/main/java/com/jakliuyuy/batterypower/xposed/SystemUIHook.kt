@@ -69,6 +69,8 @@ object SystemUIHook {
     private val clockToRoot = WeakHashMap<View, ViewGroup>()
     private val clockToView = WeakHashMap<View, SystemUIPowerView>()
     private val rootToView = WeakHashMap<ViewGroup, SystemUIPowerView>()
+    private val knownClocks: MutableSet<View> =
+        java.util.Collections.newSetFromMap(java.util.WeakHashMap<View, Boolean>())
 
     private var configFuture: ScheduledFuture<*>? = null
     private var uiLoopScheduled = false
@@ -129,6 +131,23 @@ object SystemUIHook {
     }
 
     // -------------------------------------------------------------- lifecycle
+
+    /** Records a Clock instance so it can be re-attached after config changes. */
+    fun onClockDiscovered(clock: View) {
+        try {
+            knownClocks.add(clock)
+        } catch (t: Throwable) {
+            BLog.w("SystemUI", "clock discovery failed: ${t.message}")
+        }
+    }
+
+    fun onClockForgotten(clock: View) {
+        try {
+            knownClocks.remove(clock)
+        } catch (t: Throwable) {
+            BLog.w("SystemUI", "clock forget failed: ${t.message}")
+        }
+    }
 
     fun onClockAttached(clock: View) {
         try {
@@ -286,6 +305,15 @@ object SystemUIHook {
                 removeAllViews()
                 return
             }
+            // The toggle may have been switched on after SystemUI started, in
+            // which case no PowerView exists yet: (re)run the attach flow.
+            val known = knownClocks.toList()
+            for (clock in known) {
+                if (!clock.isAttachedToWindow) continue
+                if (clockToView.containsKey(clock)) continue
+                onClockAttached(clock)
+            }
+
             val snapshot = sampler?.current() ?: BatterySnapshot.empty()
             val entries = clockToView.entries.toList()
             for ((clock, powerView) in entries) {

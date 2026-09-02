@@ -41,6 +41,7 @@ object HookLifecycle {
         if (clock == null) return
         try {
             if (!registeredClocks.add(clock)) return
+            SystemUIHook.onClockDiscovered(clock)
             clock.addOnAttachStateChangeListener(attachListener)
             BLog.d("SystemUI", "clock instance registered: ${clock.javaClass.name}")
             // The clock may already be attached when the constructor hook fires.
@@ -55,6 +56,7 @@ object HookLifecycle {
     fun releaseClock(clock: View) {
         try {
             registeredClocks.remove(clock)
+            SystemUIHook.onClockForgotten(clock)
             clock.removeOnAttachStateChangeListener(attachListener)
         } catch (t: Throwable) {
             BLog.w("SystemUI", "release clock failed: ${t.message}")

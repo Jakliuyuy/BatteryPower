@@ -47,7 +47,11 @@ class SystemUIPowerView(context: Context) : TextView(context) {
         currentConfig = config
         val sb = config.statusBar
         setTextSize(TypedValue.COMPLEX_UNIT_SP, sb.fontSizeSp)
-        setTextColor(config.statusBarColor.argb)
+        // Spec 79: automatic colour adapts to the status bar background, manual
+        // colour always wins.
+        setTextColor(
+            if (config.statusBarColor.autoColor) autoTextColor() else config.statusBarColor.argb
+        )
         typeface = resolveTypeface(sb.fontStyle)
         letterSpacing = 0f
         maxWidthPx = (sb.maxWidthDp * resources.displayMetrics.density).roundToInt()
@@ -135,6 +139,18 @@ class SystemUIPowerView(context: Context) : TextView(context) {
         paint.measureText(text) + paddingLeft + paddingRight
     } catch (t: Throwable) {
         0f
+    }
+
+    /** Dark status bar -> light text, light status bar -> dark text (spec 79). */
+    private fun autoTextColor(): Int {
+        return try {
+            val night = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            if (night) 0xFFFFFFFF.toInt() else 0xFF000000.toInt()
+        } catch (t: Throwable) {
+            0xFFFFFFFF.toInt()
+        }
     }
 
     fun measuredTextWidth(): Int = try {
